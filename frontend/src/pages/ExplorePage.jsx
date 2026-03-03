@@ -386,6 +386,7 @@ const TrendPill = ({ text, count, rank, type }) => {
 };
 
 const TopPostItem = ({ post, rank, navigate }) => {
+    const { t } = useTranslation();
     const rankColors = {
         1: 'text-yellow-500 bg-yellow-500/10',
         2: 'text-gray-400 bg-gray-400/10',

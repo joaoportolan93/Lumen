@@ -26,7 +26,7 @@ const Notifications = () => {
             setError(null);
         } catch (err) {
             console.error('Error fetching notifications:', err);
-            setError('Erro ao carregar notificações');
+            setError(t('notifications.errorLoading'));
         } finally {
             setLoading(false);
         }

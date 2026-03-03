@@ -60,7 +60,22 @@
         "fedForYou": "Feed 'Para Você'",
         "feedForYouDesc": "Mostrar o feed de recomendação algorítmica na página inicial. Se desativado, você verá apenas conteúdos de quem você segue.",
         "saving": "Salvando...",
-        "btnSave": "Salvar Configurações"
+        "btnSave": "Salvar Configurações",
+        "privacySuccess": "Visibilidade alterada para {{status}}",
+        "statusPrivate": "Privada",
+        "statusPublic": "Pública",
+        "privacyError": "Erro ao alterar privacidade",
+        "adminTitle": "Administração do Sistema",
+        "adminDesc": "Você tem privilégios de administrador. Acesse o painel para gerenciar usuários, moderação e estatísticas.",
+        "btnAdmin": "Acessar Painel Admin",
+        "cfTitle": "Gerenciar Amigos Próximos",
+        "cfDesc": "Selecione quem pode ver seus sonhos marcados como \"Amigos Próximos\". Apenas seus seguidores podem ser adicionados.",
+        "cfSearchPlaceholder": "Buscar seguidores...",
+        "cfNoFollowers": "Você ainda não tem seguidores",
+        "cfNotFound": "Nenhum seguidor encontrado",
+        "cfAddTooltip": "Adicionar aos amigos próximos",
+        "cfRemoveTooltip": "Remover dos amigos próximos",
+        "cfSelectedCount": "amigo(s) próximo(s) selecionado(s)"
     },
     "header": {
         "searchPlaceholder": "Busque sonhos, pessoas, hashtags...",

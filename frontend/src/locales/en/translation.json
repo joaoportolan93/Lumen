@@ -60,7 +60,22 @@
         "feedForYou": "'For You' Feed",
         "feedForYouDesc": "Show algorithmic recommendations on the home page. If disabled, you'll only see content from people you follow.",
         "saving": "Saving...",
-        "btnSave": "Save Settings"
+        "btnSave": "Save Settings",
+        "privacySuccess": "Visibility changed to {{status}}",
+        "statusPrivate": "Private",
+        "statusPublic": "Public",
+        "privacyError": "Error changing privacy",
+        "adminTitle": "System Administration",
+        "adminDesc": "You have administrator privileges. Access the panel to manage users, moderation, and statistics.",
+        "btnAdmin": "Access Admin Panel",
+        "cfTitle": "Manage Close Friends",
+        "cfDesc": "Select who can see your dreams tagged as \"Close Friends\". Only your followers can be added.",
+        "cfSearchPlaceholder": "Search followers...",
+        "cfNoFollowers": "You don't have any followers yet",
+        "cfNotFound": "No followers found",
+        "cfAddTooltip": "Add to close friends",
+        "cfRemoveTooltip": "Remove from close friends",
+        "cfSelectedCount": "close friend(s) selected"
     },
     "header": {
         "searchPlaceholder": "Search dreams, people, hashtags...",

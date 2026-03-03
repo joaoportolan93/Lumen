@@ -170,11 +170,11 @@ const Settings = () => {
 
         try {
             await patchUser(currentUser.id_usuario, { privacidade_padrao: newStatus });
-            setSuccess(`Visibilidade alterada para ${newStatus === 2 ? 'Privada' : 'Pública'}`);
+            setSuccess(t('settings.privacySuccess', { status: newStatus === 2 ? t('settings.statusPrivate') : t('settings.statusPublic') }));
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             console.error('Error updating privacy:', err);
-            setError('Erro ao alterar privacidade');
+            setError(t('settings.privacyError'));
             // Revert
             setCurrentUser(prev => ({ ...prev, privacidade_padrao: isPrivate ? 2 : 1 }));
             setTimeout(() => setError(''), 3000);
@@ -374,17 +374,17 @@ const Settings = () => {
                         <div className="bg-amber-500/10 border border-amber-500/30 backdrop-blur-sm rounded-2xl p-6 mb-6">
                             <h2 className="text-lg font-semibold text-amber-500 mb-4 flex items-center gap-2">
                                 <FaShieldAlt />
-                                Administração do Sistema
+                                {t('settings.adminTitle')}
                             </h2>
                             <p className="text-gray-500 dark:text-gray-400 mb-4">
-                                Você tem privilégios de administrador. Acesse o painel para gerenciar usuários, moderação e estatísticas.
+                                {t('settings.adminDesc')}
                             </p>
                             <button
                                 onClick={() => navigate('/admin')}
                                 className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-black font-bold rounded-xl hover:opacity-90 transition-all"
                             >
                                 <FaShieldAlt />
-                                Acessar Painel Admin
+                                {t('settings.btnAdmin')}
                             </button>
                         </div>
                     )}
@@ -415,10 +415,10 @@ const Settings = () => {
                 <div className="bg-white dark:bg-white/5 shadow-card dark:shadow-none backdrop-blur-sm rounded-2xl p-6 border border-white/10">
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
                         <FaStar className="text-amber-400" />
-                        Gerenciar Amigos Próximos
+                        {t('settings.cfTitle')}
                     </h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                        Selecione quem pode ver seus sonhos marcados como "Amigos Próximos". Apenas seus seguidores podem ser adicionados.
+                        {t('settings.cfDesc')}
                     </p>
 
                     {/* Search Bar */}
@@ -426,7 +426,7 @@ const Settings = () => {
                         <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Buscar seguidores..."
+                            placeholder={t('settings.cfSearchPlaceholder')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -443,8 +443,8 @@ const Settings = () => {
                             <FaUserFriends className="text-4xl text-gray-500 mx-auto mb-3" />
                             <p className="text-gray-400">
                                 {followers.length === 0
-                                    ? 'Você ainda não tem seguidores'
-                                    : 'Nenhum seguidor encontrado'
+                                    ? t('settings.cfNoFollowers')
+                                    : t('settings.cfNotFound')
                                 }
                             </p>
                         </div>
@@ -489,7 +489,7 @@ const Settings = () => {
                                             ? 'bg-amber-500/20 text-amber-400 shadow-lg shadow-amber-500/20'
                                             : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-300'
                                             }`}
-                                        title={follower.is_close_friend ? 'Remover dos amigos próximos' : 'Adicionar aos amigos próximos'}
+                                        title={follower.is_close_friend ? t('settings.cfRemoveTooltip') : t('settings.cfAddTooltip')}
                                     >
                                         <FaStar className={`text-xl ${follower.is_close_friend ? 'fill-current' : ''}`} />
                                     </button>
@@ -505,7 +505,7 @@ const Settings = () => {
                                 <span className="text-amber-400 font-bold">
                                     {followers.filter(f => f.is_close_friend).length}
                                 </span>
-                                {' '}amigo(s) próximo(s) selecionado(s)
+                                {' '}{t('settings.cfSelectedCount')}
                             </span>
                         </div>
                     )}
