@@ -1,0 +1,54 @@
+class User {
+  final String id;
+  final String nomeUsuario;
+  final String email;
+  final String nomeCompleto;
+  final String? avatar;
+  final String? bio;
+  final int seguidoresCount;
+  final int seguindoCount;
+  final int sonhosCount;
+  final bool isFollowing;
+  final bool isPrivate;
+
+  User({
+    required this.id,
+    required this.nomeUsuario,
+    required this.email,
+    required this.nomeCompleto,
+    this.avatar,
+    this.bio,
+    this.seguidoresCount = 0,
+    this.seguindoCount = 0,
+    this.sonhosCount = 0,
+    this.isFollowing = false,
+    this.isPrivate = false,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id_usuario'] ?? json['id'] ?? '',
+      nomeUsuario: json['nome_usuario'] ?? '',
+      email: json['email'] ?? '',
+      nomeCompleto: json['nome_completo'] ?? '',
+      avatar: json['avatar'],
+      bio: json['bio'],
+      seguidoresCount: json['seguidores_count'] ?? 0,
+      seguindoCount: json['seguindo_count'] ?? 0,
+      sonhosCount: json['sonhos_count'] ?? json['publicacoes_count'] ?? 0,
+      isFollowing: json['is_following'] ?? false,
+      isPrivate: json['is_private'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id_usuario': id,
+      'nome_usuario': nomeUsuario,
+      'email': email,
+      'nome_completo': nomeCompleto,
+      'avatar': avatar,
+      'bio': bio,
+    };
+  }
+}
