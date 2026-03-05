@@ -7,11 +7,11 @@ import 'api_client.dart';
 class DreamService {
   final ApiClient _api = ApiClient();
 
-  Future<List<Dream>> getFeed({int page = 1}) async {
+  Future<List<Dream>> getFeed({int page = 1, bool? following}) async {
     try {
-      final response = await _api.dio.get('dreams/', queryParameters: {
-        'page': page,
-      });
+      final params = <String, dynamic>{'page': page};
+      if (following == true) params['following'] = 'true';
+      final response = await _api.dio.get('dreams/', queryParameters: params);
 
       final results = response.data is Map
           ? (response.data['results'] as List? ?? [])
@@ -45,20 +45,23 @@ class DreamService {
         if (imagem != null)
           'imagem': await MultipartFile.fromFile(
             imagem.path,
-            filename: imagem.path.split('/').last,
+            filename: imagem.path.split(Platform.pathSeparator).last,
           ),
       });
 
       final response = await _api.dio.post('dreams/', data: formData);
       return Dream.fromJson(response.data);
-    } on DioException {
+    } on DioException catch (e) {
+      // Log the error for debugging
+      print(
+          'CreateDream error: ${e.response?.statusCode} - ${e.response?.data}');
       return null;
     }
   }
 
   Future<bool> likeDream(String dreamId) async {
     try {
-      await _api.dio.post('dreams/$dreamId/react/');
+      await _api.dio.post('dreams/$dreamId/like/');
       return true;
     } on DioException {
       return false;
@@ -95,6 +98,15 @@ class DreamService {
       return Comment.fromJson(response.data);
     } on DioException {
       return null;
+    }
+  }
+
+  Future<bool> deleteComment(String dreamId, String commentId) async {
+    try {
+      await _api.dio.delete('dreams/$dreamId/comments/$commentId/');
+      return true;
+    } on DioException {
+      return false;
     }
   }
 

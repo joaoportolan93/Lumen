@@ -33,7 +33,7 @@ class ThemeConfig {
     ),
     colorScheme: ColorScheme.fromSwatch().copyWith(
       secondary: lightAccent,
-      background: lightBG,
+      surface: lightBG,
       brightness: Brightness.light,
     ),
   );
@@ -42,28 +42,30 @@ class ThemeConfig {
     brightness: Brightness.dark,
     primaryColor: darkPrimary,
     scaffoldBackgroundColor: darkBG,
+    cardColor: darkPrimary,
     appBarTheme: AppBarTheme(
       backgroundColor: darkBG,
       elevation: 0,
+      iconTheme: IconThemeData(color: Colors.white),
       toolbarTextStyle: TextTheme(
         titleLarge: TextStyle(
-          color: lightBG,
+          color: Colors.white,
           fontSize: 18.0,
           fontWeight: FontWeight.w800,
         ),
       ).bodyMedium,
       titleTextStyle: TextTheme(
         titleLarge: TextStyle(
-          color: lightBG,
+          color: Colors.white,
           fontSize: 18.0,
           fontWeight: FontWeight.w800,
         ),
       ).titleLarge,
     ),
-    colorScheme: ColorScheme.fromSwatch().copyWith(
+    colorScheme: ColorScheme.dark(
+      primary: darkPrimary,
       secondary: darkAccent,
-      background: darkBG,
-      brightness: Brightness.dark,
+      surface: darkPrimary,
     ),
   );
 }

@@ -23,6 +23,15 @@ class UserService {
     }
   }
 
+  Future<bool> unfollowUser(String userId) async {
+    try {
+      await _api.dio.delete('users/$userId/follow/');
+      return true;
+    } on DioException {
+      return false;
+    }
+  }
+
   Future<List<User>> getFollowers(String userId) async {
     try {
       final response = await _api.dio.get('users/$userId/followers/');

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dreamshare/models/dream.dart';
 import 'package:dreamshare/models/comment.dart';
+import 'package:dreamshare/models/user.dart';
 import 'package:dreamshare/services/dream_service.dart';
+import 'package:dreamshare/services/auth_service.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class DreamDetail extends StatefulWidget {
@@ -16,11 +18,13 @@ class DreamDetail extends StatefulWidget {
 
 class _DreamDetailState extends State<DreamDetail> {
   final DreamService _dreamService = DreamService();
+  final AuthService _authService = AuthService();
   final TextEditingController _commentController = TextEditingController();
   Dream? _dream;
   List<Comment> _comments = [];
   bool _isLoading = true;
   bool _isPostingComment = false;
+  String? _currentUserId;
 
   @override
   void initState() {
@@ -36,15 +40,26 @@ class _DreamDetailState extends State<DreamDetail> {
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    final results = await Future.wait([
-      _dreamService.getDreamDetail(widget.dreamId),
-      _dreamService.getComments(widget.dreamId),
-    ]);
-    setState(() {
-      _dream = results[0] as Dream?;
-      _comments = results[1] as List<Comment>;
-      _isLoading = false;
-    });
+    try {
+      final dreamFuture = _dreamService.getDreamDetail(widget.dreamId);
+      final commentsFuture = _dreamService.getComments(widget.dreamId);
+      User? currentUser;
+      try {
+        currentUser = await _authService.getProfile();
+      } catch (_) {}
+
+      final dream = await dreamFuture;
+      final comments = await commentsFuture;
+
+      setState(() {
+        _dream = dream;
+        _comments = comments;
+        _currentUserId = currentUser?.id;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _postComment() async {
@@ -58,6 +73,38 @@ class _DreamDetailState extends State<DreamDetail> {
     if (comment != null) {
       _commentController.clear();
       _loadData();
+    }
+  }
+
+  Future<void> _deleteComment(Comment comment) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir comentário'),
+        content: const Text('Tem certeza que deseja excluir este comentário?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final success =
+          await _dreamService.deleteComment(widget.dreamId, comment.id);
+      if (success) {
+        _loadData();
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Falha ao excluir comentário')),
+        );
+      }
     }
   }
 
@@ -81,10 +128,14 @@ class _DreamDetailState extends State<DreamDetail> {
                               CircleAvatar(
                                 radius: 22,
                                 backgroundImage: _dream!.usuario?.avatar != null
-                                    ? CachedNetworkImageProvider(_dream!.usuario!.avatar!)
+                                    ? CachedNetworkImageProvider(
+                                        _dream!.usuario!.avatar!)
                                     : null,
                                 child: _dream!.usuario?.avatar == null
-                                    ? Text(_dream!.usuario?.nomeUsuario.substring(0, 1).toUpperCase() ?? '?')
+                                    ? Text(_dream!.usuario?.nomeUsuario
+                                            .substring(0, 1)
+                                            .toUpperCase() ??
+                                        '?')
                                     : null,
                               ),
                               const SizedBox(width: 12),
@@ -93,11 +144,15 @@ class _DreamDetailState extends State<DreamDetail> {
                                 children: [
                                   Text(
                                     _dream!.usuario?.nomeUsuario ?? 'Anônimo',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),
                                   ),
                                   Text(
-                                    timeago.format(_dream!.dataPublicacao, locale: 'pt_BR'),
-                                    style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                                    timeago.format(_dream!.dataPublicacao,
+                                        locale: 'pt_BR'),
+                                    style: TextStyle(
+                                        color: Colors.grey[500], fontSize: 13),
                                   ),
                                 ],
                               ),
@@ -120,7 +175,8 @@ class _DreamDetailState extends State<DreamDetail> {
                                 return Text(
                                   tag.startsWith('#') ? tag : '#$tag',
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.secondary,
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 );
@@ -149,7 +205,8 @@ class _DreamDetailState extends State<DreamDetail> {
                               const SizedBox(width: 4),
                               Text('${_dream!.curtidasCount}'),
                               const SizedBox(width: 16),
-                              Icon(Icons.chat_bubble_outline, color: Colors.grey, size: 18),
+                              Icon(Icons.chat_bubble_outline,
+                                  color: Colors.grey, size: 18),
                               const SizedBox(width: 4),
                               Text('${_comments.length}'),
                             ],
@@ -160,7 +217,8 @@ class _DreamDetailState extends State<DreamDetail> {
                           // Comments section
                           const Text(
                             'Comentários',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 12),
 
@@ -175,19 +233,21 @@ class _DreamDetailState extends State<DreamDetail> {
                               ),
                             )
                           else
-                            ..._comments.map((comment) => _buildCommentTile(comment)),
+                            ..._comments
+                                .map((comment) => _buildCommentTile(comment)),
                         ],
                       ),
                     ),
 
                     // Comment input
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: Theme.of(context).scaffoldBackgroundColor,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 10,
                             offset: const Offset(0, -2),
                           ),
@@ -207,7 +267,8 @@ class _DreamDetailState extends State<DreamDetail> {
                                   ),
                                   filled: true,
                                   fillColor: Colors.grey[200],
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 10),
                                 ),
                               ),
                             ),
@@ -216,13 +277,16 @@ class _DreamDetailState extends State<DreamDetail> {
                                 ? const SizedBox(
                                     width: 24,
                                     height: 24,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2),
                                   )
                                 : IconButton(
                                     onPressed: _postComment,
                                     icon: Icon(
                                       Icons.send_rounded,
-                                      color: Theme.of(context).colorScheme.secondary,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
                                     ),
                                   ),
                           ],
@@ -235,6 +299,9 @@ class _DreamDetailState extends State<DreamDetail> {
   }
 
   Widget _buildCommentTile(Comment comment) {
+    final isOwn =
+        _currentUserId != null && comment.usuario?.id == _currentUserId;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -246,7 +313,11 @@ class _DreamDetailState extends State<DreamDetail> {
                 ? CachedNetworkImageProvider(comment.usuario!.avatar!)
                 : null,
             child: comment.usuario?.avatar == null
-                ? Text(comment.usuario?.nomeUsuario.substring(0, 1).toUpperCase() ?? '?',
+                ? Text(
+                    comment.usuario?.nomeUsuario
+                            .substring(0, 1)
+                            .toUpperCase() ??
+                        '?',
                     style: const TextStyle(fontSize: 12))
                 : null,
           ),
@@ -275,6 +346,14 @@ class _DreamDetailState extends State<DreamDetail> {
               ],
             ),
           ),
+          if (isOwn)
+            IconButton(
+              icon: const Icon(Icons.delete_outline,
+                  size: 18, color: Colors.grey),
+              onPressed: () => _deleteComment(comment),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
         ],
       ),
     );

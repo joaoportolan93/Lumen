@@ -18,6 +18,7 @@ class DreamCard extends StatefulWidget {
 class _DreamCardState extends State<DreamCard> {
   late bool _isLiked;
   late int _likesCount;
+  late bool _isSaved;
   final DreamService _dreamService = DreamService();
 
   @override
@@ -25,6 +26,7 @@ class _DreamCardState extends State<DreamCard> {
     super.initState();
     _isLiked = widget.dream.isLiked;
     _likesCount = widget.dream.curtidasCount;
+    _isSaved = widget.dream.isSaved;
   }
 
   @override
@@ -60,7 +62,10 @@ class _DreamCardState extends State<DreamCard> {
                         : null,
                     child: dream.usuario?.avatar == null
                         ? Text(
-                            dream.usuario?.nomeUsuario.substring(0, 1).toUpperCase() ?? '?',
+                            dream.usuario?.nomeUsuario
+                                    .substring(0, 1)
+                                    .toUpperCase() ??
+                                '?',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           )
                         : null,
@@ -89,9 +94,13 @@ class _DreamCardState extends State<DreamCard> {
                   ),
                   if (dream.comunidadeNome != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .secondary
+                            .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -192,7 +201,8 @@ class _DreamCardState extends State<DreamCard> {
                   // Comment button
                   Row(
                     children: [
-                      Icon(Icons.chat_bubble_outline, color: Colors.grey, size: 20),
+                      Icon(Icons.chat_bubble_outline,
+                          color: Colors.grey, size: 20),
                       const SizedBox(width: 4),
                       Text(
                         '${dream.comentariosCount}',
@@ -206,10 +216,19 @@ class _DreamCardState extends State<DreamCard> {
                   const Spacer(),
 
                   // Save button
-                  Icon(
-                    dream.isSaved ? Icons.bookmark : Icons.bookmark_border,
-                    color: dream.isSaved ? Theme.of(context).colorScheme.secondary : Colors.grey,
-                    size: 22,
+                  InkWell(
+                    onTap: _toggleSave,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(
+                        _isSaved ? Icons.bookmark : Icons.bookmark_border,
+                        color: _isSaved
+                            ? Theme.of(context).colorScheme.secondary
+                            : Colors.grey,
+                        size: 22,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -223,7 +242,8 @@ class _DreamCardState extends State<DreamCard> {
   Future<void> _toggleLike() async {
     setState(() {
       _isLiked = !_isLiked;
-      _likesCount = (_likesCount + (_isLiked ? 1 : -1)).clamp(0, double.maxFinite.toInt());
+      _likesCount = (_likesCount + (_isLiked ? 1 : -1))
+          .clamp(0, double.maxFinite.toInt());
     });
 
     final success = await _dreamService.likeDream(widget.dream.id);
@@ -231,7 +251,21 @@ class _DreamCardState extends State<DreamCard> {
       // Revert on failure
       setState(() {
         _isLiked = !_isLiked;
-        _likesCount = (_likesCount + (_isLiked ? 1 : -1)).clamp(0, double.maxFinite.toInt());
+        _likesCount = (_likesCount + (_isLiked ? 1 : -1))
+            .clamp(0, double.maxFinite.toInt());
+      });
+    }
+  }
+
+  Future<void> _toggleSave() async {
+    setState(() {
+      _isSaved = !_isSaved;
+    });
+
+    final success = await _dreamService.saveDream(widget.dream.id);
+    if (!success) {
+      setState(() {
+        _isSaved = !_isSaved;
       });
     }
   }

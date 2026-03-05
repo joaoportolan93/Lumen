@@ -89,11 +89,27 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         return super().post(request, *args, **kwargs)
 
 class UserProfileView(APIView):
-    """Get current authenticated user's profile"""
+    """Get/update current authenticated user's profile"""
     permission_classes = (permissions.IsAuthenticated,)
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get(self, request):
         serializer = UserSerializer(request.user, context={'request': request})
+        return Response(serializer.data)
+
+    def put(self, request):
+        user = request.user
+        data = request.data
+
+        if 'nome_completo' in data:
+            user.nome_completo = data['nome_completo']
+        if 'bio' in data:
+            user.bio = data['bio']
+        if 'avatar' in request.FILES:
+            user.avatar_url = request.FILES['avatar']
+
+        user.save()
+        serializer = UserSerializer(user, context={'request': request})
         return Response(serializer.data)
 
 class UserDetailView(APIView):

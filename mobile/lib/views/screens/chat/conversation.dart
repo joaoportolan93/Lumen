@@ -31,8 +31,8 @@ class _ConversationState extends State<Conversation> {
               Padding(
                 padding: EdgeInsets.only(left: 0.0, right: 10.0),
                 child: CircleAvatar(
-                  backgroundImage: AssetImage(
-                    "assets/cm${random.nextInt(10)}.jpeg",
+                  backgroundImage: NetworkImage(
+                    "https://picsum.photos/seed/user${random.nextInt(100)}/200",
                   ),
                 ),
               ),
@@ -85,7 +85,7 @@ class _ConversationState extends State<Conversation> {
                   return ChatBubble(
                     message: msg['type'] == "text"
                         ? messages[random.nextInt(10)]
-                        : "assets/cm${random.nextInt(10)}.jpeg",
+                        : "https://picsum.photos/seed/img${random.nextInt(100)}/400/300",
                     username: msg["username"],
                     time: msg["time"],
                     type: msg['type'],

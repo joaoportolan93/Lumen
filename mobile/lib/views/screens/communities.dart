@@ -45,7 +45,8 @@ class _CommunitiesState extends State<Communities> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.holiday_village_rounded, size: 64, color: Colors.grey),
+                      Icon(Icons.holiday_village_rounded,
+                          size: 64, color: Colors.grey),
                       SizedBox(height: 16),
                       Text(
                         'Nenhuma comunidade encontrada',
@@ -76,7 +77,8 @@ class _CommunitiesState extends State<Communities> {
         contentPadding: const EdgeInsets.all(12),
         leading: CircleAvatar(
           radius: 28,
-          backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+          backgroundColor:
+              Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
           child: Text(
             community.nome.substring(0, 1).toUpperCase(),
             style: TextStyle(
@@ -112,7 +114,10 @@ class _CommunitiesState extends State<Communities> {
         trailing: community.isMembro
             ? Chip(
                 label: const Text('Membro', style: TextStyle(fontSize: 11)),
-                backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                backgroundColor: Theme.of(context)
+                    .colorScheme
+                    .secondary
+                    .withValues(alpha: 0.1),
               )
             : null,
         onTap: () {

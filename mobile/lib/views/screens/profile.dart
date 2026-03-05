@@ -5,6 +5,7 @@ import 'package:dreamshare/models/dream.dart';
 import 'package:dreamshare/services/auth_service.dart';
 import 'package:dreamshare/services/dream_service.dart';
 import 'package:dreamshare/views/screens/auth/login.dart';
+import 'package:dreamshare/views/screens/edit_profile.dart';
 import 'package:dreamshare/views/widgets/dream_card.dart';
 import 'package:dreamshare/util/router.dart';
 
@@ -64,7 +65,9 @@ class _ProfileState extends State<Profile> {
             children: [
               const Text('Erro ao carregar perfil'),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _loadProfile, child: const Text('Tentar novamente')),
+              ElevatedButton(
+                  onPressed: _loadProfile,
+                  child: const Text('Tentar novamente')),
             ],
           ),
         ),
@@ -113,7 +116,8 @@ class _ProfileState extends State<Profile> {
                 child: _user!.avatar == null
                     ? Text(
                         _user!.nomeUsuario.substring(0, 1).toUpperCase(),
-                        style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 36, fontWeight: FontWeight.bold),
                       )
                     : null,
               ),
@@ -122,7 +126,8 @@ class _ProfileState extends State<Profile> {
               // Full name
               Text(
                 _user!.nomeCompleto,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
 
@@ -146,6 +151,32 @@ class _ProfileState extends State<Profile> {
                 ],
               ),
 
+              const SizedBox(height: 16),
+
+              // Edit Profile button
+              SizedBox(
+                width: 160,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditProfile(user: _user!),
+                      ),
+                    );
+                    if (result == true) _loadProfile();
+                  },
+                  icon: const Icon(Icons.edit, size: 16),
+                  label: const Text('Editar Perfil'),
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                ),
+              ),
+
               const SizedBox(height: 20),
               const Divider(),
               const SizedBox(height: 8),
@@ -160,7 +191,8 @@ class _ProfileState extends State<Profile> {
                   ),
                 )
               else
-                ..._dreams.map((dream) => DreamCard(dream: dream, onUpdate: _loadProfile)),
+                ..._dreams.map(
+                    (dream) => DreamCard(dream: dream, onUpdate: _loadProfile)),
             ],
           ),
         ),

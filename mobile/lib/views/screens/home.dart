@@ -8,34 +8,65 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   final DreamService _dreamService = DreamService();
-  List<Dream> _dreams = [];
-  bool _isLoading = true;
-  bool _hasError = false;
+  late TabController _tabController;
+
+  List<Dream> _forYouDreams = [];
+  List<Dream> _followingDreams = [];
+  bool _isLoadingForYou = true;
+  bool _isLoadingFollowing = true;
+  bool _hasErrorForYou = false;
+  bool _hasErrorFollowing = false;
 
   @override
   void initState() {
     super.initState();
-    _loadDreams();
+    _tabController = TabController(length: 2, vsync: this);
+    _loadForYou();
+    _loadFollowing();
   }
 
-  Future<void> _loadDreams() async {
-    setState(() {
-      _isLoading = true;
-      _hasError = false;
-    });
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
+  Future<void> _loadForYou() async {
+    setState(() {
+      _isLoadingForYou = true;
+      _hasErrorForYou = false;
+    });
     try {
       final dreams = await _dreamService.getFeed();
       setState(() {
-        _dreams = dreams;
-        _isLoading = false;
+        _forYouDreams = dreams;
+        _isLoadingForYou = false;
       });
     } catch (e) {
       setState(() {
-        _isLoading = false;
-        _hasError = true;
+        _isLoadingForYou = false;
+        _hasErrorForYou = true;
+      });
+    }
+  }
+
+  Future<void> _loadFollowing() async {
+    setState(() {
+      _isLoadingFollowing = true;
+      _hasErrorFollowing = false;
+    });
+    try {
+      final dreams = await _dreamService.getFeed(following: true);
+      setState(() {
+        _followingDreams = dreams;
+        _isLoadingFollowing = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingFollowing = false;
+        _hasErrorFollowing = true;
       });
     }
   }
@@ -52,20 +83,60 @@ class _HomeState extends State<Home> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadDreams,
+            onPressed: () {
+              _loadForYou();
+              _loadFollowing();
+            },
+          ),
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Theme.of(context).colorScheme.secondary,
+          labelColor: Theme.of(context).colorScheme.secondary,
+          unselectedLabelColor: Colors.grey,
+          tabs: const [
+            Tab(text: 'Para Você'),
+            Tab(text: 'Seguindo'),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildFeedList(
+            dreams: _forYouDreams,
+            isLoading: _isLoadingForYou,
+            hasError: _hasErrorForYou,
+            onRefresh: _loadForYou,
+            emptyMessage: 'Nenhum sonho ainda...',
+            emptySubMessage: 'Seja o primeiro a compartilhar!',
+          ),
+          _buildFeedList(
+            dreams: _followingDreams,
+            isLoading: _isLoadingFollowing,
+            hasError: _hasErrorFollowing,
+            onRefresh: _loadFollowing,
+            emptyMessage: 'Nenhum sonho de quem você segue',
+            emptySubMessage: 'Siga outros usuários para ver sonhos aqui!',
           ),
         ],
       ),
-      body: _buildBody(),
     );
   }
 
-  Widget _buildBody() {
-    if (_isLoading) {
+  Widget _buildFeedList({
+    required List<Dream> dreams,
+    required bool isLoading,
+    required bool hasError,
+    required Future<void> Function() onRefresh,
+    required String emptyMessage,
+    required String emptySubMessage,
+  }) {
+    if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_hasError) {
+    if (hasError) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -78,7 +149,7 @@ class _HomeState extends State<Home> {
             ),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: _loadDreams,
+              onPressed: onRefresh,
               child: const Text('Tentar novamente'),
             ),
           ],
@@ -86,21 +157,21 @@ class _HomeState extends State<Home> {
       );
     }
 
-    if (_dreams.isEmpty) {
-      return const Center(
+    if (dreams.isEmpty) {
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.nightlight_round, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            const Icon(Icons.nightlight_round, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
-              'Nenhum sonho ainda...',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
+              emptyMessage,
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              'Seja o primeiro a compartilhar!',
-              style: TextStyle(color: Colors.grey),
+              emptySubMessage,
+              style: const TextStyle(color: Colors.grey),
             ),
           ],
         ),
@@ -108,12 +179,12 @@ class _HomeState extends State<Home> {
     }
 
     return RefreshIndicator(
-      onRefresh: _loadDreams,
+      onRefresh: onRefresh,
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        itemCount: _dreams.length,
+        itemCount: dreams.length,
         itemBuilder: (context, index) {
-          return DreamCard(dream: _dreams[index], onUpdate: _loadDreams);
+          return DreamCard(dream: dreams[index], onUpdate: onRefresh);
         },
       ),
     );

@@ -43,6 +43,7 @@ class CustomTextField extends StatelessWidget {
         onChanged: onChange,
         style: TextStyle(
           fontSize: 15.0,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
         key: key,
         controller: controller,
