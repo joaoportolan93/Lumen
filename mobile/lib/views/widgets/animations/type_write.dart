@@ -60,7 +60,9 @@ class _TypeWriteState extends State<TypeWrite> with TickerProviderStateMixin {
         return Text(
           text,
           style: widget.style,
-          textScaleFactor: widget.textScaleFactor,
+          textScaler: widget.textScaleFactor != null
+              ? TextScaler.linear(widget.textScaleFactor!)
+              : null,
           textAlign: TextAlign.center,
         );
       },

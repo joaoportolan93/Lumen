@@ -56,7 +56,10 @@ class _CommunityDetailState extends State<CommunityDetail> {
                     Center(
                       child: CircleAvatar(
                         radius: 40,
-                        backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .secondary
+                            .withValues(alpha: 0.2),
                         child: Text(
                           _community!.nome.substring(0, 1).toUpperCase(),
                           style: TextStyle(
@@ -71,7 +74,8 @@ class _CommunityDetailState extends State<CommunityDetail> {
                     Center(
                       child: Text(
                         _community!.nome,
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
                       ),
                     ),
                     if (_community!.descricao != null) ...[
@@ -96,11 +100,13 @@ class _CommunityDetailState extends State<CommunityDetail> {
                       Center(
                         child: ElevatedButton(
                           onPressed: () async {
-                            await _communityService.joinCommunity(widget.communityId);
+                            await _communityService
+                                .joinCommunity(widget.communityId);
                             _loadData();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.secondary,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.secondary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
@@ -124,7 +130,8 @@ class _CommunityDetailState extends State<CommunityDetail> {
                       ),
                     )
                   else
-                    ..._posts.map((dream) => DreamCard(dream: dream, onUpdate: _loadData)),
+                    ..._posts.map((dream) =>
+                        DreamCard(dream: dream, onUpdate: _loadData)),
                 ],
               ),
             ),

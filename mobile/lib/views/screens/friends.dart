@@ -61,7 +61,7 @@ class _FriendsState extends State<Friends> {
                         ),
                       ),
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.grey),
+                        backgroundColor: WidgetStateProperty.all(Colors.grey),
                       ),
                       onPressed: () {},
                     )
@@ -73,7 +73,7 @@ class _FriendsState extends State<Friends> {
                         ),
                       ),
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
+                        backgroundColor: WidgetStateProperty.all(
                           Theme.of(context).colorScheme.secondary,
                         ),
                       ),

@@ -24,12 +24,25 @@ class _CreateDreamState extends State<CreateDream> {
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() {
-        _image = File(picked.path);
-      });
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+      if (picked != null) {
+        setState(() {
+          _image = File(picked.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao selecionar imagem: $e')),
+        );
+      }
     }
   }
 
@@ -115,12 +128,35 @@ class _CreateDreamState extends State<CreateDream> {
             TextField(
               controller: _contentController,
               maxLines: 8,
-              decoration: const InputDecoration(
+              maxLength: 500,
+              decoration: InputDecoration(
                 hintText: 'Conte sobre o seu sonho...',
-                border: OutlineInputBorder(
+                border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(16)),
                 ),
-                contentPadding: EdgeInsets.all(16),
+                contentPadding: const EdgeInsets.all(16),
+                counterText: '', // Hide default counter
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4, right: 4),
+                child: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _contentController,
+                  builder: (context, value, _) {
+                    final len = value.text.length;
+                    final color = len > 450
+                        ? Colors.red
+                        : len > 350
+                            ? Colors.orange
+                            : Colors.grey;
+                    return Text(
+                      '$len/500',
+                      style: TextStyle(color: color, fontSize: 12),
+                    );
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -137,7 +173,8 @@ class _CreateDreamState extends State<CreateDream> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(16)),
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                     onSubmitted: (_) => _addHashtag(),
                   ),
@@ -179,7 +216,8 @@ class _CreateDreamState extends State<CreateDream> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
 
@@ -205,7 +243,8 @@ class _CreateDreamState extends State<CreateDream> {
                       radius: 16,
                       backgroundColor: Colors.black54,
                       child: IconButton(
-                        icon: const Icon(Icons.close, size: 16, color: Colors.white),
+                        icon: const Icon(Icons.close,
+                            size: 16, color: Colors.white),
                         onPressed: () => setState(() => _image = null),
                       ),
                     ),

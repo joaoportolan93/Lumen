@@ -51,6 +51,19 @@ class _LoginState extends State<Login> {
           nomeCompleto: name,
           password: password,
         );
+      } else if (formMode == FormMode.FORGOT_PASSWORD) {
+        // Mocking forgot password behavior
+        if (mounted) {
+          setState(() => loading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Link de redefinição enviado para o email!')),
+          );
+          setState(() {
+            formMode = FormMode.LOGIN;
+          });
+        }
+        return;
       }
       if (mounted) {
         Navigate.pushPageReplacement(context, MainScreen());
@@ -81,7 +94,7 @@ class _LoginState extends State<Login> {
               child: AnimatedContainer(
                 duration: Duration(milliseconds: 500),
                 child: Center(
-                  child: Padding(
+                  child: SingleChildScrollView(
                     padding:
                         EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
                     child: buildFormContainer(),
@@ -100,7 +113,7 @@ class _LoginState extends State<Login> {
     return AnimatedContainer(
       width: screenWidth < 700 ? 0 : screenWidth * 0.5,
       duration: Duration(milliseconds: 500),
-      color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
       child: Center(
         child: Lottie.asset(
           AppAnimations.chatAnimation,
@@ -122,6 +135,7 @@ class _LoginState extends State<Login> {
           style: TextStyle(
             fontSize: 40.0,
             fontWeight: FontWeight.bold,
+            color: Theme.of(context).textTheme.headlineLarge?.color,
           ),
         ).fadeInList(0, false),
         SizedBox(height: 10),
@@ -129,7 +143,8 @@ class _LoginState extends State<Login> {
           'Compartilhe seus sonhos ✨',
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey[500],
+            color: Theme.of(context).textTheme.bodySmall?.color ??
+                Colors.grey[500],
           ),
         ),
         SizedBox(height: 50.0),

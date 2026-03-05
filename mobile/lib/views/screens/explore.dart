@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dreamshare/models/user.dart';
 import 'package:dreamshare/services/user_service.dart';
+import 'package:dreamshare/views/screens/user_profile.dart';
 
 class Explore extends StatefulWidget {
   @override
@@ -103,7 +104,8 @@ class _ExploreState extends State<Explore> {
     if (_searchController.text.isNotEmpty) {
       if (_results.isEmpty) {
         return const Center(
-          child: Text('Nenhum resultado encontrado', style: TextStyle(color: Colors.grey)),
+          child: Text('Nenhum resultado encontrado',
+              style: TextStyle(color: Colors.grey)),
         );
       }
       return _buildUserList(_results);
@@ -127,7 +129,8 @@ class _ExploreState extends State<Explore> {
         Expanded(
           child: _suggested.isEmpty
               ? const Center(
-                  child: Text('Nenhuma sugestão disponível', style: TextStyle(color: Colors.grey)),
+                  child: Text('Nenhuma sugestão disponível',
+                      style: TextStyle(color: Colors.grey)),
                 )
               : _buildUserList(_suggested),
         ),
@@ -163,20 +166,46 @@ class _ExploreState extends State<Explore> {
           subtitle: Text(user.nomeCompleto),
           trailing: TextButton(
             onPressed: () async {
-              await _userService.followUser(user.id);
+              bool isCurrentlyFollowing = _followedIds.contains(user.id);
+              bool success = false;
+
+              // Optimistic UI update
               setState(() {
-                if (_followedIds.contains(user.id)) {
+                if (isCurrentlyFollowing) {
                   _followedIds.remove(user.id);
                 } else {
                   _followedIds.add(user.id);
                 }
               });
+
+              if (isCurrentlyFollowing) {
+                success = await _userService.unfollowUser(user.id);
+              } else {
+                success = await _userService.followUser(user.id);
+              }
+
+              if (!success) {
+                // Revert on failure
+                setState(() {
+                  if (isCurrentlyFollowing) {
+                    _followedIds.add(user.id);
+                  } else {
+                    _followedIds.remove(user.id);
+                  }
+                });
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Falha ao atualizar seguir/remover')),
+                );
+              }
             },
             style: TextButton.styleFrom(
               backgroundColor: _followedIds.contains(user.id)
                   ? Colors.grey[300]
                   : Theme.of(context).colorScheme.secondary,
-              foregroundColor: _followedIds.contains(user.id) ? Colors.black : Colors.white,
+              foregroundColor:
+                  _followedIds.contains(user.id) ? Colors.black : Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -184,7 +213,12 @@ class _ExploreState extends State<Explore> {
             child: Text(_followedIds.contains(user.id) ? 'Seguindo' : 'Seguir'),
           ),
           onTap: () {
-            // TODO: Navigate to user profile
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => UserProfile(userId: user.id),
+              ),
+            );
           },
         );
       },

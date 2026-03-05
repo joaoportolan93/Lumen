@@ -27,17 +27,18 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id_usuario'] ?? json['id'] ?? '',
+      id: json['id_usuario']?.toString() ?? json['id']?.toString() ?? '',
       nomeUsuario: json['nome_usuario'] ?? '',
       email: json['email'] ?? '',
       nomeCompleto: json['nome_completo'] ?? '',
-      avatar: json['avatar'],
+      avatar: json['avatar_url'] ?? json['avatar'],
       bio: json['bio'],
       seguidoresCount: json['seguidores_count'] ?? 0,
       seguindoCount: json['seguindo_count'] ?? 0,
       sonhosCount: json['sonhos_count'] ?? json['publicacoes_count'] ?? 0,
-      isFollowing: json['is_following'] ?? false,
-      isPrivate: json['is_private'] ?? false,
+      isFollowing: json['is_following'] == true,
+      isPrivate:
+          (json['privacidade_padrao'] ?? 1) == 2 || json['is_private'] == true,
     );
   }
 

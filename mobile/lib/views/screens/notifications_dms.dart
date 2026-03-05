@@ -32,8 +32,10 @@ class _NotificationsDmsState extends State<NotificationsDms>
   }
 
   Future<void> _loadNotifications() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
     final notifs = await _notificationService.getNotifications();
+    if (!mounted) return;
     setState(() {
       _notifications = notifs;
       _isLoading = false;
@@ -124,7 +126,12 @@ class _NotificationsDmsState extends State<NotificationsDms>
                 fontSize: 12,
               ),
             ),
-            tileColor: notif.lida ? null : Theme.of(context).colorScheme.secondary.withOpacity(0.05),
+            tileColor: notif.lida
+                ? null
+                : Theme.of(context)
+                    .colorScheme
+                    .secondary
+                    .withValues(alpha: 0.05),
             onTap: () async {
               await _notificationService.markAsRead(notif.id);
               _loadNotifications();
